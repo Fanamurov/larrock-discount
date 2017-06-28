@@ -3,7 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 
-class UpdateLarrockCategoryDiscountsTable extends Migration {
+class UpdateCategoryDiscountsTable extends Migration {
 
 	/**
 	 * Run the migrations.
