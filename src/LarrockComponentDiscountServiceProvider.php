@@ -13,6 +13,7 @@ class LarrockComponentDiscountServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        $this->loadRoutesFrom(__DIR__.'/routes.php');
         $this->loadViewsFrom(__DIR__.'/views', 'larrock');
 
         $this->publishes([
@@ -27,7 +28,6 @@ class LarrockComponentDiscountServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        include __DIR__.'/routes.php';
         $this->app->make(DiscountComponent::class);
 
         $timestamp = date('Y_m_d_His', time());
