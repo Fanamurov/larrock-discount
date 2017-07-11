@@ -3,6 +3,7 @@
 namespace Larrock\ComponentDiscount;
 
 use Illuminate\Support\ServiceProvider;
+use Larrock\ComponentDiscount\Middleware\DiscountsShare;
 
 class LarrockComponentDiscountServiceProvider extends ServiceProvider
 {
@@ -29,6 +30,8 @@ class LarrockComponentDiscountServiceProvider extends ServiceProvider
     public function register()
     {
         $this->app->make(DiscountComponent::class);
+
+        $this->app['router']->aliasMiddleware('DiscountsShare', DiscountsShare::class);
 
         $timestamp = date('Y_m_d_His', time());
         $timestamp_after = date('Y_m_d_His', time()+10);
