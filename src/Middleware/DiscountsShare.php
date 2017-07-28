@@ -4,6 +4,7 @@ namespace Larrock\ComponentDiscount\Middleware;
 
 use Closure;
 use View;
+use Larrock\ComponentDiscount\Helpers\DiscountHelper;
 
 class DiscountsShare
 {

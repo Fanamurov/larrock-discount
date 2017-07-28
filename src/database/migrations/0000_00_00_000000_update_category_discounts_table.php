@@ -12,9 +12,9 @@ class UpdateCategoryDiscountsTable extends Migration {
 	 */
 	public function up()
 	{
-		Schema::table('cart', function(Blueprint $table)
+		Schema::table('category', function(Blueprint $table)
 		{
-            $table->integer('discount_id')->unsigned()->nullable()->index('category_discount_id_foreign');
+            $table->integer('discount_id')->unsigned()->nullable();
 		});
 	}
 
@@ -26,7 +26,7 @@ class UpdateCategoryDiscountsTable extends Migration {
 	 */
 	public function down()
 	{
-        Schema::table('cart', function (Blueprint $table) {
+        Schema::table('category', function (Blueprint $table) {
             $table->dropColumn('discount_id');
         });
 	}

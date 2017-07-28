@@ -52,7 +52,7 @@ class DiscountHelper
         }
         if($db_cart_total === NULL && Cart::instance('main')->count(TRUE) > 0){
             foreach (Cart::instance('main')->content() as $cart_item){
-                if($category_model = $cart_item->model->get_category){
+                if(isset($cart_item->model->get_category) && $category_model = $cart_item->model->get_category){
                     if($check_category_discount = $this->check_discount_category($category_model)){
                         $data['discount']['category'][$check_category_discount->id] = $check_category_discount;
                     }

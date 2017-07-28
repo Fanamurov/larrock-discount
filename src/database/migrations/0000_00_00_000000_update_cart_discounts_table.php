@@ -3,7 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 
-class AddForeignKeysToCategoryDiscountTable extends Migration {
+class UpdateCartDiscountsTable extends Migration {
 
 	/**
 	 * Run the migrations.
@@ -14,7 +14,7 @@ class AddForeignKeysToCategoryDiscountTable extends Migration {
 	{
 		Schema::table('cart', function(Blueprint $table)
 		{
-            $table->foreign('discount_id')->references('id')->on('discount')->onUpdate('RESTRICT')->onDelete('CASCADE');
+			$table->integer('discount_id')->unsigned()->nullable();
 		});
 	}
 
@@ -26,10 +26,9 @@ class AddForeignKeysToCategoryDiscountTable extends Migration {
 	 */
 	public function down()
 	{
-		Schema::table('cart', function(Blueprint $table)
-		{
-            $table->dropForeign('category_discount_id_foreign');
-		});
+        Schema::table('cart', function (Blueprint $table) {
+            $table->dropColumn('discount_id');
+        });
 	}
 
 }
