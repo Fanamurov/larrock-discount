@@ -49,6 +49,7 @@ use Larrock\Core\Models\Seo;
  */
 class Discount extends Model
 {
+    /** TODO: внедрить конструктор модели как в других компонентах. Внедрить использование фасада **/
     protected $table = 'discount';
 
     protected $fillable = ['title', 'description', 'url', 'type', 'word', 'cost_min', 'cost_max', 'percent', 'num',
