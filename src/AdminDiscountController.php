@@ -25,7 +25,7 @@ class AdminDiscountController extends Controller
         $Component = new DiscountComponent();
         $this->config = $Component->shareConfig();
 
-        Breadcrumbs::setView('larrock::admin.breadcrumb.breadcrumb');
+        \Config::set('breadcrumbs.view', 'larrock::admin.breadcrumb.breadcrumb');
         Breadcrumbs::register('admin.'. $this->config->name .'.index', function($breadcrumbs){
             $breadcrumbs->push($this->config->title, '/admin/'. $this->config->name);
         });
