@@ -25,8 +25,8 @@ class CreateDiscountTable extends Migration {
 			$table->integer('percent');
 			$table->integer('num');
 			$table->integer('d_count');
-			$table->timestamp('date_start')->default(DB::raw('CURRENT_TIMESTAMP'));
-			$table->dateTime('date_end')->default('0000-00-00 00:00:00');
+			$table->timestamp('date_start')->nullable();
+			$table->dateTime('date_end')->nullable();
 			$table->integer('position')->default(0);
 			$table->integer('active')->default(1);
 			$table->timestamps();
