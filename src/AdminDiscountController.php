@@ -2,17 +2,16 @@
 
 namespace Larrock\ComponentDiscount;
 
-use Alert;
 use Breadcrumbs;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-
 use App\Http\Controllers\Controller;
 use JsValidator;
 use Lang;
 use Larrock\ComponentDiscount\Models\Discount;
 use Larrock\Core\Component;
 use Redirect;
+use Session;
 use Validator;
 use View;
 
@@ -54,7 +53,7 @@ class AdminDiscountController extends Controller
     public function store(Request $request)
     {
         if($search_blank = Discount::whereUrl('novyy-material')->first()){
-            Alert::add('errorAdmin', 'Измените URL этого материала, чтобы получить возможность создать новый')->flash();
+            Session::push('message.danger', 'Измените URL этого материала, чтобы получить возможность создать новый');
             return redirect()->to('/admin/'. $this->config->name .'/'. $search_blank->id. '/edit');
         }
 
@@ -71,10 +70,10 @@ class AdminDiscountController extends Controller
 
         if($data->save()){
             \Cache::flush();
-            Alert::add('success', Lang::get('apps.create.success-temp'))->flash();
+            Session::push('message.success', Lang::get('apps.create.success-temp'));
             return Redirect::to('/admin/'. $this->config->name .'/'. $data->id .'/edit')->withInput();
         }
-        Alert::add('error', Lang::get('apps.create.error'));
+        Session::push('message.danger',  Lang::get('apps.create.error'));
         return back()->withInput();
     }
 
@@ -107,10 +106,10 @@ class AdminDiscountController extends Controller
         $update_data['url'] = str_slug($request->get('title'));
         if($data->fill($update_data)->save()){
             \Cache::flush();
-            Alert::add('success', Lang::get('apps.update.success', ['name' => $request->input('title')]))->flash();
+            Session::push('message.success', Lang::get('apps.update.success', ['name' => $request->input('title')]));
             return back();
         }
-        Alert::add('warning', Lang::get('apps.update.nothing', ['name' => $request->input('title')]))->flash();
+        Session::push('message.danger', Lang::get('apps.update.nothing', ['name' => $request->input('title')]));
         return back()->withInput();
     }
 
@@ -131,12 +130,12 @@ class AdminDiscountController extends Controller
 
             if($data->delete()){
                 \Cache::flush();
-                Alert::add('successAdmin', Lang::get('apps.delete.success', ['name' => $name]))->flash();
+                Session::push('message.success', Lang::get('apps.delete.success', ['name' => $name]));
             }else{
-                Alert::add('errorAdmin', Lang::get('apps.delete.error', ['name' => $name]))->flash();
+                Session::push('message.danger', Lang::get('apps.delete.error', ['name' => $name]));
             }
         }else{
-            Alert::add('errorAdmin', 'Такого материала больше нет')->flash();
+            Session::push('message.danger', 'Такого материала больше нет');
         }
 
         if($request->get('place') === 'material'){

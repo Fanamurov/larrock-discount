@@ -30,7 +30,10 @@ class LarrockComponentDiscountServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->make(DiscountComponent::class);
+        $this->app->singleton('larrockdiscount', function() {
+            $class = config('larrock.components.discount', DiscountComponent::class);
+            return new $class;
+        });
 
         $this->app['router']->aliasMiddleware('DiscountsShare', DiscountsShare::class);
     }
