@@ -1,6 +1,6 @@
 <?php
 
-namespace Larrock\ComponentPages\Facades;
+namespace Larrock\ComponentDiscount\Facades;
 
 use Illuminate\Support\Facades\Facade;
 
