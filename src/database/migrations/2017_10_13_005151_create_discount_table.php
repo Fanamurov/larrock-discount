@@ -17,7 +17,7 @@ class CreateDiscountTable extends Migration {
 			$table->increments('id');
 			$table->char('title');
 			$table->text('description');
-			$table->char('url')->unique();
+			$table->char('url', 191)->unique();
 			$table->char('type');
 			$table->char('word');
 			$table->integer('cost_min');
