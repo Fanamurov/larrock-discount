@@ -5,18 +5,27 @@ namespace Larrock\ComponentDiscount;
 use Breadcrumbs;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-use JsValidator;
+use Illuminate\Routing\Controller;
 use Lang;
 use Larrock\ComponentDiscount\Models\Discount;
 use Larrock\Core\Component;
+use Larrock\Core\Traits\AdminMethodsDestroy;
+use Larrock\Core\Traits\AdminMethodsEdit;
 use Redirect;
 use Session;
 use Validator;
 use View;
 
+/**
+ * TODO: Переписать компонент
+ * Class AdminDiscountController
+ * @package Larrock\ComponentDiscount
+ */
+
 class AdminDiscountController extends Controller
 {
+    use AdminMethodsEdit, AdminMethodsDestroy;
+
     protected $config;
 
     public function __construct()
@@ -77,23 +86,6 @@ class AdminDiscountController extends Controller
         return back()->withInput();
     }
 
-    public function edit($id)
-    {
-        $data['data'] = Discount::findOrFail($id);
-        $data['app'] = $this->config->tabbable($data['data']);
-
-        $validator = JsValidator::make(Component::_valid_construct($this->config, 'update', $id));
-        View::share('validator', $validator);
-
-        Breadcrumbs::register('admin.'. $this->config->name .'.edit', function($breadcrumbs, $data)
-        {
-            $breadcrumbs->parent('admin.'. $this->config->name .'.index');
-            $breadcrumbs->push($data->title);
-        });
-
-        return view('larrock::admin.admin-builder.edit', $data);
-    }
-
     public function update(Request $request, $id)
     {
         $validator = Validator::make($request->all(), Component::_valid_construct($this->config, 'update', $id));
@@ -111,36 +103,5 @@ class AdminDiscountController extends Controller
         }
         Session::push('message.danger', Lang::get('apps.update.nothing', ['name' => $request->input('title')]));
         return back()->withInput();
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param Request $request
-     * @param  int $id
-     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Http\Response
-     */
-    public function destroy(Request $request, $id)
-    {
-        if($data = Discount::find($id)){
-            $name = $data->title;
-
-            $Component = new DiscountComponent();
-            $Component->removeDataPlugins($this->config);
-
-            if($data->delete()){
-                \Cache::flush();
-                Session::push('message.success', Lang::get('apps.delete.success', ['name' => $name]));
-            }else{
-                Session::push('message.danger', Lang::get('apps.delete.error', ['name' => $name]));
-            }
-        }else{
-            Session::push('message.danger', 'Такого материала больше нет');
-        }
-
-        if($request->get('place') === 'material'){
-            return Redirect::to('/admin/'. $this->config->name);
-        }
-        return back();
     }
 }
