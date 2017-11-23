@@ -100,8 +100,8 @@ class DiscountHelper
             ->where('d_count', '>', 0)
             ->where('cost_min', '<', $this->cart_total)
             ->where('cost_max', '>', $this->cart_total)
-            ->where('date_start', '<', Carbon::now()->format('Y-m-d H:i:s'))
-            ->where('date_end', '>', Carbon::now()->format('Y-m-d H:i:s'))
+            ->where('date_start', '<=', Carbon::now()->format('Y-m-d H:i:s'))
+            ->where('date_end', '>=', Carbon::now()->format('Y-m-d H:i:s'))
             ->first()){
             return $discount_cart;
         }
@@ -132,8 +132,8 @@ class DiscountHelper
                 ->where('d_count', '>', 0)
                 ->where('cost_min', '<', $sum)
                 ->where('cost_max', '>', $sum)
-                ->where('date_start', '<', Carbon::now()->format('Y-m-d H:i:s'))
-                ->where('date_end', '>', Carbon::now()->format('Y-m-d H:i:s'))
+                ->where('date_start', '<=', Carbon::now()->format('Y-m-d H:i:s'))
+                ->where('date_end', '>=', Carbon::now()->format('Y-m-d H:i:s'))
                 ->first()){
                 return $discount_history;
             }
@@ -150,8 +150,8 @@ class DiscountHelper
             ->whereType('Купон')
             ->where('d_count', '>', 0)
             ->where('word', '=', $word)
-            ->where('date_start', '<', Carbon::now()->format('Y-m-d H:i:s'))
-            ->where('date_end', '>', Carbon::now()->format('Y-m-d H:i:s'))
+            ->where('date_start', '<=', Carbon::now()->format('Y-m-d H:i:s'))
+            ->where('date_end', '>=', Carbon::now()->format('Y-m-d H:i:s'))
             ->first()){
             return $discount_cart;
         }
@@ -174,24 +174,24 @@ class DiscountHelper
                 //Если нет, проверяем, прикреплены ли скидки к разделам выше
                 if(isset($value->get_parent->discount_id) && $value->get_parent->discount_id !== NULL){
                     $discount = Discount::whereId($value->get_parent->discount_id)
-                        ->where('date_start', '<', Carbon::now()->format('Y-m-d H:i:s'))
-                        ->where('date_end', '>', Carbon::now()->format('Y-m-d H:i:s'))
+                        ->where('date_start', '<=', Carbon::now()->format('Y-m-d H:i:s'))
+                        ->where('date_end', '>=', Carbon::now()->format('Y-m-d H:i:s'))
                         ->whereActive(1)->first();
                 }
             }
             if($discount === NULL && isset($value->get_parent->get_parent)){
                 if($value->get_parent->get_parent->discount_id !== NULL){
                     $discount = Discount::whereId($value->get_parent->get_parent->discount_id)
-                        ->where('date_start', '<', Carbon::now()->format('Y-m-d H:i:s'))
-                        ->where('date_end', '>', Carbon::now()->format('Y-m-d H:i:s'))
+                        ->where('date_start', '<=', Carbon::now()->format('Y-m-d H:i:s'))
+                        ->where('date_end', '>=', Carbon::now()->format('Y-m-d H:i:s'))
                         ->whereActive(1)->first();
                 }
             }
             if($discount === NULL && isset($value->get_parent->get_parent->get_parent)){
                 if($value->get_parent->get_parent->get_parent->discount_id !== NULL){
                     $discount = Discount::whereId($value->get_parent->get_parent->get_parent->discount_id)
-                        ->where('date_start', '<', Carbon::now()->format('Y-m-d H:i:s'))
-                        ->where('date_end', '>', Carbon::now()->format('Y-m-d H:i:s'))
+                        ->where('date_start', '<=', Carbon::now()->format('Y-m-d H:i:s'))
+                        ->where('date_end', '>=', Carbon::now()->format('Y-m-d H:i:s'))
                         ->whereActive(1)->first();
                 }
             }
