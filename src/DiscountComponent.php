@@ -30,7 +30,7 @@ class DiscountComponent extends Component
 
         $row = new FormSelect('type', 'Тип скидки');
         $this->rows['type'] = $row->setValid('max:255|required')->setDefaultValue('Скидка в корзине')->setOptions(['Скидка в корзине', 'Накопительная скидка',
-            'Купон', 'Скидка для группы товаров', 'Скидка для параметра'])->setCssClassGroup('uk-width-1-2 uk-width-medium-1-3 uk-width-large-1-4');
+            'Купон', 'Скидка для параметра'])->setCssClassGroup('uk-width-1-2 uk-width-medium-1-3 uk-width-large-1-4');
 
         $row = new FormInput('word', 'Слово-активатор скидки');
         $this->rows['word'] = $row->setValid('max:255')->setCssClassGroup('uk-width-1-2 uk-width-medium-1-3 uk-width-large-1-4')->setInTableAdmin();
@@ -45,7 +45,7 @@ class DiscountComponent extends Component
         $this->rows['percent'] = $row->setValid('max:100|integer')->setCssClassGroup('uk-width-1-2 uk-width-medium-1-3 uk-width-large-1-4')->setInTableAdmin();
 
         $row = new FormInput('num', 'Скидка к сумме в абс. величине');
-        $this->rows['num'] = $row->setValid('max:10|integer')->setCssClassGroup('uk-width-1-2 uk-width-medium-1-3 uk-width-large-1-4')->setInTableAdmin();
+        $this->rows['num'] = $row->setValid('integer')->setCssClassGroup('uk-width-1-2 uk-width-medium-1-3 uk-width-large-1-4')->setInTableAdmin();
 
         $row = new FormInput('d_count', 'Сколько раз может быть использован');
         $this->rows['d_count'] = $row->setValid('integer')->setCssClassGroup('uk-width-1-2 uk-width-medium-1-3 uk-width-large-1-4')->setInTableAdmin();
@@ -58,10 +58,4 @@ class DiscountComponent extends Component
 
         return $this;
     }
-
-    /*public function renderAdminMenu()
-    {
-        $count = Discount::count(['id']);
-        return view('admin.sectionmenu.types.default', ['count' => $count, 'app' => $this, 'url' => '/admin/'. $this->name]);
-    }*/
 }

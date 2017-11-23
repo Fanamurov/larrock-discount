@@ -6,7 +6,6 @@
         <div class="add-panel uk-margin-bottom uk-text-right">
             <a class="uk-button" href="#modal-help" data-uk-modal="{target:'#modal-help'}"><i class="uk-icon-question"></i></a>
             <a class="uk-button uk-button-primary" href="/admin/{{ $app->name }}/create">Добавить скидку</a>
-            <a href="#add_category" class="uk-button uk-button-primary show-please" data-target="create-category" data-focus="create-category-title">Добавить раздел</a>
         </div>
         <div id="modal-help" class="uk-modal">
             <div class="uk-modal-dialog">
