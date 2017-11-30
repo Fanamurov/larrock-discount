@@ -4,7 +4,9 @@ namespace Larrock\ComponentDiscount\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Larrock\ComponentCategory\Models\Category;
+use Larrock\ComponentDiscount\Facades\LarrockDiscount;
 use Larrock\Core\Models\Seo;
+use Larrock\Core\Traits\GetLink;
 
 /**
  * App\Models\Discount
@@ -49,11 +51,15 @@ use Larrock\Core\Models\Seo;
  */
 class Discount extends Model
 {
-    /** TODO: внедрить конструктор модели как в других компонентах. Внедрить использование фасада **/
-    protected $table = 'discount';
+    use GetLink;
 
-    protected $fillable = ['title', 'description', 'url', 'type', 'word', 'cost_min', 'cost_max', 'percent', 'num',
-        'd_count', 'date_start', 'date_end', 'position', 'active'];
+    public function __construct(array $attributes = [])
+    {
+        parent::__construct($attributes);
+        $this->fillable(LarrockDiscount::addFillableUserRows([]));
+        $this->config = LarrockDiscount::getConfig();
+        $this->table = LarrockDiscount::getTable();
+    }
 
     protected $casts = [
         'position' => 'integer',
