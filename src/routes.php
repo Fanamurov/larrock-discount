@@ -8,3 +8,7 @@ Route::group(['prefix' => 'admin', 'middleware'=> ['web', 'level:2', 'LarrockAdm
         'show' => 'admin.discount.show',
     ]]);
 });
+
+Breadcrumbs::register('admin.'. LarrockDiscount::getName() .'.index', function($breadcrumbs){
+    $breadcrumbs->push(LarrockDiscount::getTitle(), '/admin/'. LarrockDiscount::getName());
+});

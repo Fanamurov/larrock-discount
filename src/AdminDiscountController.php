@@ -2,11 +2,11 @@
 
 namespace Larrock\ComponentDiscount;
 
-use Breadcrumbs;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Lang;
+use Larrock\ComponentDiscount\Facades\LarrockDiscount;
 use Larrock\ComponentDiscount\Models\Discount;
 use Larrock\Core\Component;
 use Larrock\Core\Traits\AdminMethodsDestroy;
@@ -17,7 +17,6 @@ use Validator;
 use View;
 
 /**
- * TODO: Переписать компонент
  * Class AdminDiscountController
  * @package Larrock\ComponentDiscount
  */
@@ -30,13 +29,9 @@ class AdminDiscountController extends Controller
 
     public function __construct()
     {
-        $Component = new DiscountComponent();
-        $this->config = $Component->shareConfig();
+        $this->config = LarrockDiscount::shareConfig();
 
         \Config::set('breadcrumbs.view', 'larrock::admin.breadcrumb.breadcrumb');
-        Breadcrumbs::register('admin.'. $this->config->name .'.index', function($breadcrumbs){
-            $breadcrumbs->push($this->config->title, '/admin/'. $this->config->name);
-        });
     }
 
     public function index()
@@ -63,10 +58,10 @@ class AdminDiscountController extends Controller
     {
         if($search_blank = Discount::whereUrl('novyy-material')->first()){
             Session::push('message.danger', 'Измените URL этого материала, чтобы получить возможность создать новый');
-            return redirect()->to('/admin/'. $this->config->name .'/'. $search_blank->id. '/edit');
+            return redirect()->to('/admin/'. LarrockDiscount::getName() .'/'. $search_blank->id. '/edit');
         }
 
-        $validator = Validator::make($request->all(), $this->config->valid);
+        $validator = Validator::make($request->all(), LarrockDiscount::getValid());
         if($validator->fails()){
             return back()->withInput($request->except('password'))->withErrors($validator);
         }
@@ -80,7 +75,7 @@ class AdminDiscountController extends Controller
         if($data->save()){
             \Cache::flush();
             Session::push('message.success', Lang::get('apps.create.success-temp'));
-            return Redirect::to('/admin/'. $this->config->name .'/'. $data->id .'/edit')->withInput();
+            return Redirect::to('/admin/'. LarrockDiscount::getName() .'/'. $data->id .'/edit')->withInput();
         }
         Session::push('message.danger',  Lang::get('apps.create.error'));
         return back()->withInput();
