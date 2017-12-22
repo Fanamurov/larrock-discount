@@ -11,6 +11,7 @@ use Larrock\ComponentDiscount\Models\Discount;
 use Larrock\Core\Component;
 use Larrock\Core\Traits\AdminMethodsDestroy;
 use Larrock\Core\Traits\AdminMethodsEdit;
+use Larrock\Core\Traits\ShareMethods;
 use Redirect;
 use Session;
 use Validator;
@@ -23,12 +24,13 @@ use View;
 
 class AdminDiscountController extends Controller
 {
-    use AdminMethodsEdit, AdminMethodsDestroy;
+    use AdminMethodsEdit, AdminMethodsDestroy, ShareMethods;
 
     protected $config;
 
     public function __construct()
     {
+        $this->shareMethods();
         $this->config = LarrockDiscount::shareConfig();
 
         \Config::set('breadcrumbs.view', 'larrock::admin.breadcrumb.breadcrumb');
