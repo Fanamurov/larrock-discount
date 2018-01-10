@@ -7,6 +7,7 @@ use Larrock\ComponentCategory\Models\Category;
 use Larrock\ComponentDiscount\Facades\LarrockDiscount;
 use Larrock\Core\Models\Seo;
 use Larrock\Core\Traits\GetLink;
+use Larrock\Core\Component;
 
 /**
  * App\Models\Discount
@@ -51,6 +52,11 @@ use Larrock\Core\Traits\GetLink;
  */
 class Discount extends Model
 {
+    /**
+     * @var $this Component
+     */
+    protected $config;
+    
     use GetLink;
 
     public function __construct(array $attributes = [])
