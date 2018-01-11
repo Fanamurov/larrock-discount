@@ -84,6 +84,11 @@ class Discount extends Model
 
     protected $dates = ['created_at', 'updated_at', 'date_start', 'date_end'];
 
+    public function getConfig()
+    {
+        return $this->config;
+    }
+
     public function get_seo()
     {
         return $this->hasOne(Seo::class, 'id_connect', 'id');
