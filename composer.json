@@ -2,7 +2,7 @@
     "name": "fanamurov/larrock-discount",
     "description": "Discounts in catalog component for larrockCMS",
     "type": "library",
-    "license": "LGPL",
+    "license": "CC-BY-4.0",
     "authors": [
         {
             "name": "Alexandr Fanamurov",
