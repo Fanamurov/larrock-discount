@@ -20,8 +20,8 @@ class DiscountController extends Controller
     {
         if($request->has('keyword')){
             $discountHelper = new DiscountHelper();
-            if($data = $discountHelper->check_kupon($request->get('keyword'))){
-                return response()->json(['type' => 'success', 'message' => $data->description]);
+            if($data = $discountHelper->checkKupon($request->get('keyword'))){
+                return response()->json(['type' => 'success', 'description' => $data->description, 'title' => $data->title]);
             }
         }
         return response()->json(['type' => 'notice', 'message' => 'Такого купона нет']);

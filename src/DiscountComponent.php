@@ -16,7 +16,7 @@ class DiscountComponent extends Component
         $this->name = $this->table = 'discount';
         $this->title = 'Скидки';
         $this->description = 'Скидочная система для каталога';
-        $this->model = Discount::class;
+        $this->model = \config('larrock.models.discount', Discount::class);
         $this->addRows()->addPositionAndActive();
     }
 
@@ -55,7 +55,8 @@ class DiscountComponent extends Component
 
         $row = new FormInput('d_count', 'Сколько раз может быть использован');
         $this->rows['d_count'] = $row->setValid('integer')
-            ->setCssClassGroup('uk-width-1-2 uk-width-medium-1-3 uk-width-large-1-4')->setInTableAdmin()->setFillable();
+            ->setCssClassGroup('uk-width-1-2 uk-width-medium-1-3 uk-width-large-1-4')->setInTableAdmin()
+            ->setFillable()->setDefaultValue(9999999);
 
         $row = new FormDate('date_start', 'Дата начала акции');
         $this->rows['date_start'] = $row->setDefaultValue(date('Y-m-d H:i:s'))

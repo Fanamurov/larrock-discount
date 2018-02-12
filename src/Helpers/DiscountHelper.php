@@ -2,303 +2,156 @@
 
 namespace Larrock\ComponentDiscount\Helpers;
 
+use Larrock\ComponentCart\Facades\LarrockCart;
 use Larrock\ComponentCatalog\CatalogComponent;
-use Larrock\ComponentDiscount\Models\Discount;
+use Larrock\ComponentDiscount\Facades\LarrockDiscount;
 use Request;
 use Carbon\Carbon;
 use Cart;
 use Larrock\ComponentCart\Models\Cart as ModelCart;
+use Cache;
 
 class DiscountHelper
 {
-    protected $cart_total;
+    public $total;
+    public $clear_total;
+    public $profit;
+    public $history;
+    public $discounts;
+    public $d_cart;
+    public $d_history;
+    public $d_kupon;
+    public $kupon;
 
-    /**
-     * Установка значения суммы в корзине без скидок
-     * Или текущая корзина из куков, или из сущ.заказа в БД
-     * @param null $db_cart_total
-     */
-    public function set_total($db_cart_total = NULL)
+    public function __construct()
     {
-        $this->cart_total = (float)str_replace(',', '', Cart::instance('main')->total());
-        if($db_cart_total && $db_cart_total > 0){
-            $this->cart_total = (float)$db_cart_total;
-        }
+        $this->getActiveDiscounts();
+        $total = str_replace(',', '', Cart::instance('main')->total());
+        $this->total = $this->clear_total = (float)$total;
+        $this->history = (float)0;
+    }
+
+    /** Получение всех активных скидок */
+    public function getActiveDiscounts()
+    {
+        $this->discounts = Cache::rememberForever(sha1('getActiveDiscounts'), function () {
+            return LarrockDiscount::getModel()->whereActive(1)->where('date_start', '<=', Carbon::now()->format('Y-m-d H:i:s'))
+                ->where('date_end', '>=', Carbon::now()->format('Y-m-d H:i:s'))->get()->groupBy('type');;
+        });
     }
 
     /**
-     * Проверка и применение скидок к заказу
-     * @param null $word    слово скидочного купона
-     * @param null $db_cart_total   кастомное значение суммы заказа (например из БД)
-     * @return array
+     * Проверка на возможность применения скидок и их применение
+     * TODO: купоны, скидки к товарам, категориям товаров
+     * @param null|float|int $total
+     * @param null|string $kupon
      */
-    public function check($word = NULL, $db_cart_total = NULL)
+    public function check($total = NULL, $kupon = NULL)
     {
-        $this->set_total($db_cart_total);
-
-        if($this->cart_total === 0){
-            return NULL;
+        if($total){
+            $this->total = $this->clear_total = (float)str_replace(',', '', $total);
         }
 
-        $data = [];
-        if($cart = $this->check_cart()){
-            $data['discount']['cart'] = $cart;
+        if(\Request::has('kupon') && !empty(\Request::get('kupon'))){
+            $this->kupon = \Request::get('kupon');
         }
-        if($history = $this->check_history()){
-            $data['discount']['history'] = $history;
+        if($kupon){
+            $this->kupon = $kupon;
         }
-        if($kupon = $this->check_kupon($word)){
-            $data['discount']['kupon'] = $kupon;
-        }
-        if($db_cart_total === NULL && Cart::instance('main')->count(TRUE) > 0){
-            foreach (Cart::instance('main')->content() as $cart_item){
-                if(isset($cart_item->model->get_category) && $category_model = $cart_item->model->get_category){
-                    if($check_category_discount = $this->check_discount_category($category_model)){
-                        $data['discount']['category'][$check_category_discount->id] = $check_category_discount;
-                    }
+
+        if($this->discounts){
+            //Скидка в корзине
+            $this->d_cart = $this->discounts['Скидка в корзине']->where('cost_min', '<=', $this->total)->where('cost_max', '>=', $this->total)
+                ->where('d_count', '>', 0)->sortByDesc(['percent'])->sortByDesc(['num'])->first();
+
+            $this->d_kupon = $this->discounts['Купон']->where('word', '=', $this->kupon)->where('d_count', '>', 0)
+                ->sortByDesc(['percent'])->sortByDesc(['num'])->first();
+
+            //Накопительная скидка по истории заказов
+            if(\Auth::check()){
+                $cache_key = sha1('userHistoryCart'. \Auth::user()->id);
+                $userHistory = Cache::rememberForever($cache_key, function () {
+                    return LarrockCart::getModel()->whereUser(\Auth::user()->id)->whereStatusOrder('Завершен')->get();
+                });
+                if($userHistory){
+                    $this->history = $userHistory->sum(['cost']);
+                    $this->d_history = $this->discounts['Накопительная скидка']->where('cost_min', '<=', $this->history)
+                        ->where('cost_max', '>=', $this->history)->where('d_count', '>', 0)
+                        ->sortByDesc(['percent'])->sortByDesc(['num'])->first();
                 }
             }
-        }
 
-        $data['cost_before_discount'] = $data['cost_after_discount'] = $this->cart_total;
-        $data['profit'] = 0;
-        if(array_key_exists('discount', $data)){
-            foreach ($data['discount'] as $discount_key => $item){
-                if($discount_key === 'category'){
-                    //Скидка к разделу у товара
-                    //dd(Cart::instance('main')->content());
-                    //$this->apply_discountsByTovar();
-                    //dd($item);
-                }else{
-                    if($db_cart_total){
-                        if($item->percent > 0){
-                            $data['profit'] += $this->cart_total - $this->cart_total*(100-$item->percent)/100;
-                        }
-                        if($item->num > 0){
-                            $data['profit'] += $item->num;
-                        }
-                    }else{
-                        $data['profit'] += $item->profit_after_apply;
-                    }
-                }
-            }
-            if($data['profit'] > 0){
-                $data['cost_after_discount'] = $this->cart_total - $data['profit'];
-            }
+            $this->applyDiscounts();
         }
-
-        return $data;
+        return $this;
     }
 
-    public function check_cart($db_cart_total = NULL)
+    /**
+     * Применение скидок
+     * Вычисление total и profit
+     */
+    protected function applyDiscounts()
     {
-        if($db_cart_total !== NULL){
-            $this->set_total($db_cart_total);
-        }
-        if($discount_cart = Discount::whereActive(1)
-            ->whereType('Скидка в корзине')
-            ->where('d_count', '>', 0)
-            ->where('cost_min', '<', $this->cart_total)
-            ->where('cost_max', '>', $this->cart_total)
-            ->where('date_start', '<=', Carbon::now()->format('Y-m-d H:i:s'))
-            ->where('date_end', '>=', Carbon::now()->format('Y-m-d H:i:s'))
-            ->first()){
-            return $discount_cart;
-        }
-        return NULL;
-    }
-
-    public function motivate_cart_discount($db_cart_total = NULL)
-    {
-        $this->set_total($db_cart_total);
-        $get_discount = Discount::whereActive(1)
-            ->whereType('Скидка в корзине')
-            ->where('d_count', '>', 0)
-            ->where('cost_max', '>', $this->cart_total)
-            ->where('date_start', '<', Carbon::now()->format('Y-m-d H:i:s'))
-            ->where('date_end', '>', Carbon::now()->format('Y-m-d H:i:s'))
-            ->orderBy('cost_min', 'ASC')
-            ->get();
-        return $get_discount;
-    }
-
-    public function check_history()
-    {
-        //Смотрим историю покупок
-        if($user_id = \Auth::guard()->id()){
-            $sum = ModelCart::whereUser($user_id)->whereStatusOrder('Завершен')->sum('cost');
-            if($discount_history = Discount::whereActive(1)
-                ->whereType('Накопительная скидка')
-                ->where('d_count', '>', 0)
-                ->where('cost_min', '<', $sum)
-                ->where('cost_max', '>', $sum)
-                ->where('date_start', '<=', Carbon::now()->format('Y-m-d H:i:s'))
-                ->where('date_end', '>=', Carbon::now()->format('Y-m-d H:i:s'))
-                ->first()){
-                return $discount_history;
+        //Применение скидки в корзине
+        if($this->d_cart){
+            if($this->d_cart->percent > 0){
+                $this->total = $this->total - (($this->total/100) * $this->d_cart->percent);
+            }elseif($this->d_cart->num > 0){
+                $this->total = $this->total - (float)$this->d_cart->num;
             }
         }
-        return NULL;
-    }
 
-    public function check_kupon($word)
-    {
-        if(Request::get('kupon')){
-            $word = Request::get('kupon');
-        }
-        if($discount_cart = Discount::whereActive(1)
-            ->whereType('Купон')
-            ->where('d_count', '>', 0)
-            ->where('word', '=', $word)
-            ->where('date_start', '<=', Carbon::now()->format('Y-m-d H:i:s'))
-            ->where('date_end', '>=', Carbon::now()->format('Y-m-d H:i:s'))
-            ->first()){
-            return $discount_cart;
-        }
-        return NULL;
-    }
-
-    public function check_discount_category($categories)
-    {
-        $discount = NULL;
-
-        foreach ($categories as $value){
-            //Ищем прикрепленные скидки к разделу товара
-            if($value->discount_id !== NULL){
-                $discount = Discount::whereId($value->discount_id)
-                    ->where('date_start', '<', Carbon::now()->format('Y-m-d H:i:s'))
-                    ->where('date_end', '>', Carbon::now()->format('Y-m-d H:i:s'))
-                    ->whereActive(1)->first();
-            }
-            if($discount === NULL){
-                //Если нет, проверяем, прикреплены ли скидки к разделам выше
-                if(isset($value->get_parent->discount_id) && $value->get_parent->discount_id !== NULL){
-                    $discount = Discount::whereId($value->get_parent->discount_id)
-                        ->where('date_start', '<=', Carbon::now()->format('Y-m-d H:i:s'))
-                        ->where('date_end', '>=', Carbon::now()->format('Y-m-d H:i:s'))
-                        ->whereActive(1)->first();
-                }
-            }
-            if($discount === NULL && isset($value->get_parent->get_parent)){
-                if($value->get_parent->get_parent->discount_id !== NULL){
-                    $discount = Discount::whereId($value->get_parent->get_parent->discount_id)
-                        ->where('date_start', '<=', Carbon::now()->format('Y-m-d H:i:s'))
-                        ->where('date_end', '>=', Carbon::now()->format('Y-m-d H:i:s'))
-                        ->whereActive(1)->first();
-                }
-            }
-            if($discount === NULL && isset($value->get_parent->get_parent->get_parent)){
-                if($value->get_parent->get_parent->get_parent->discount_id !== NULL){
-                    $discount = Discount::whereId($value->get_parent->get_parent->get_parent->discount_id)
-                        ->where('date_start', '<=', Carbon::now()->format('Y-m-d H:i:s'))
-                        ->where('date_end', '>=', Carbon::now()->format('Y-m-d H:i:s'))
-                        ->whereActive(1)->first();
-                }
+        if($this->d_history){
+            if($this->d_history->percent > 0){
+                $this->total = $this->total - (($this->total/100) * $this->d_history->percent);
+            }elseif($this->d_history->num > 0){
+                $this->total = $this->total - (float)$this->d_history->num;
             }
         }
-        return $discount;
-    }
 
-    public function apply_discount_category($tovar)
-    {
-        if($discount = $this->check_discount_category($tovar->get_category)){
-            if($discount->percent > 0){
-                $tovar['cost_old'] = $tovar['cost'];
-                $tovar['cost'] = $tovar['cost']*(100-$discount->percent)/100;
-                $tovar->discount_tovar = collect();
-                $tovar->discount_tovar->push($discount);
-                $tovar['apply_discount'] = TRUE;
-            }
-            if($discount->num > 0){
-                $tovar['cost_old'] = $tovar['cost'];
-                $tovar['cost'] -= $discount->num;
-                $tovar->discount_tovar = collect();
-                $tovar->discount_tovar->push($discount);
-                $tovar['apply_discount'] = TRUE;
+        if($this->d_kupon){
+            if($this->d_kupon->percent > 0){
+                $this->total = $this->total - (($this->total/100) * $this->d_kupon->percent);
+            }elseif($this->d_kupon->num > 0){
+                $this->total = $this->total - (float)$this->d_kupon->num;
             }
         }
-        $tovar['cost'] = (float)$tovar['cost'];
-        $tovar['cost_old'] = (float)$tovar['cost_old'];
-        return $tovar;
-    }
 
-    public function getCostDiscount($tovar)
-    {
-        if($discount = $this->check_discount_category($tovar->get_category)){
-            if($discount->percent > 0){
-                return $tovar['cost']*(100-$discount->percent)/100;
-            }
-            if($discount->num > 0){
-                $tovar['cost'] -= $discount->num;
-                return $tovar['cost'];
-            }
-        }
-        return (float)$tovar['cost'];
-    }
-
-    public function discountCountApply($discounts)
-    {
-        foreach ($discounts as $discount_item){
-            if($find_discount = Discount::whereId($discount_item->id)->first()){
-                --$find_discount->d_count;
-            }
-            $find_discount->update();
+        //Подсчет выгоды покупателя
+        if($this->total){
+            $this->profit = $this->clear_total - $this->total;
         }
     }
 
-    public function apply_discount_param($tovar)
+    /**
+     * Подсчет кол-ва использования каждой примененной скидки
+     * @return $this
+     */
+    public function countApplyDiscounts()
     {
-        $config = new CatalogComponent();
-
-        $discount_rows = [];
-        foreach($config->rows as $key => $row){
-            if(get_class($row) === 'Larrock\Core\Helpers\FormBuilder\Tags' || get_class($row) === 'Larrock\Core\Helpers\FormBuilder\TagsCreate'){
-                $discount_rows[$row->name] = $row;
-                $discount_rows[$row->name]['values'] = \DB::table($row->connect['table'])->get();
-            }
+        $this->check();
+        if($this->d_cart){
+            $discount = $this->d_cart;
+            $discount->d_count = --$discount->d_count;
+            $discount->save();
         }
-
-        foreach ($discount_rows as $discount_key => $discount_value){
-            $search_data = array_map('trim', explode(',', $tovar->{$discount_key}));
-            foreach ($discount_value['values'] as $value){
-                if(in_array($value->title, $search_data, TRUE) && isset($value->discount)){
-                    if($value->discount){
-                        $get_discount = Discount::whereActive(1)->whereType('Скидка для параметра')->whereId($value->discount)->first();
-
-                        $original_cost = $tovar['cost'];
-                        if($tovar['cost_old'] > 0){
-                            $original_cost = $tovar['cost_old'];
-                        }
-                        $new_cost = 99999999;
-                        if($get_discount->percent > 0){
-                            $new_cost = $original_cost*(100-$get_discount->percent)/100;
-                        }
-                        if((int)$get_discount->num > 0){
-                            $new_cost = (float)$original_cost - (float)$get_discount->num;
-                        }
-                        if($new_cost < $tovar->cost){
-                            $tovar->cost = $new_cost;
-                            $tovar->cost_old = $original_cost;
-                            $tovar->discount_tovar = collect();
-                            $tovar->discount_tovar->push($get_discount);
-                            $tovar->apply_discount = TRUE;
-                        }
-                    }
-                }
-            }
+        if($this->d_history){
+            $discount = $this->d_history;
+            $discount->d_count = --$discount->d_count;
+            $discount->save();
         }
-        return $tovar;
+        if($this->kupon){
+            $discount = $this->d_kupon;
+            $discount->d_count = --$discount->d_count;
+            $discount->save();
+        }
+        return $this;
     }
 
-    public function apply_discountsByTovar($tovar, $change_total = NULL)
+    public function checkKupon($word)
     {
-        if($change_total){
-            $this->set_total($tovar->cost);
-        }
-        $tovar = $this->apply_discount_category($tovar);
-        $tovar = $this->apply_discount_param($tovar);
-        $tovar->cost = (float)$tovar->cost;
-        $tovar->old_cost = (float)$tovar->old_cost;
-        return $tovar;
+        $this->kupon = $word;
+        return $this->discounts['Купон']->where('word', '=', $this->kupon)->where('d_count', '>', 0)
+            ->sortByDesc(['percent'])->sortByDesc(['num'])->first();
     }
 }

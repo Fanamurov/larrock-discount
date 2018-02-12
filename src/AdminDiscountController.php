@@ -50,7 +50,6 @@ class AdminDiscountController extends Controller
             'type' => 'default',
             'date_start' => Carbon::now()->format('Y-m-d H:s:i'),
             'date_end' => Carbon::now()->format('Y-m-d H:s:i'),
-            'url' => str_slug('novyy-material'),
             'active' => 0
         ]);
         return $this->store($test);
@@ -58,11 +57,6 @@ class AdminDiscountController extends Controller
 
     public function store(Request $request)
     {
-        if($search_blank = Discount::whereUrl('novyy-material')->first()){
-            Session::push('message.danger', 'Измените URL этого материала, чтобы получить возможность создать новый');
-            return redirect()->to('/admin/'. LarrockDiscount::getName() .'/'. $search_blank->id. '/edit');
-        }
-
         $validator = Validator::make($request->all(), LarrockDiscount::getValid());
         if($validator->fails()){
             return back()->withInput($request->except('password'))->withErrors($validator);
@@ -72,15 +66,14 @@ class AdminDiscountController extends Controller
         $data->fill($request->all());
         $data->active = $request->input('active', 0);
         $data->position = $request->input('position', 0);
-        $data->url = str_slug($request->input('title'));
 
         if($data->save()){
             \Cache::flush();
-            Session::push('message.success', Lang::get('apps.create.success-temp'));
-            return Redirect::to('/admin/'. LarrockDiscount::getName() .'/'. $data->id .'/edit')->withInput();
+            Session::push('message.success', Lang::get('larrock::apps.create.success-temp'));
+        }else{
+            Session::push('message.danger',  Lang::get('larrock::apps.create.error'));
         }
-        Session::push('message.danger',  Lang::get('apps.create.error'));
-        return back()->withInput();
+        return back()->to(route('admin.discount.index'));
     }
 
     public function update(Request $request, $id)
@@ -95,10 +88,10 @@ class AdminDiscountController extends Controller
         $update_data['url'] = str_slug($request->get('title'));
         if($data->fill($update_data)->save()){
             \Cache::flush();
-            Session::push('message.success', Lang::get('apps.update.success', ['name' => $request->input('title')]));
+            Session::push('message.success', Lang::get('larrock::apps.update.success', ['name' => $request->input('title')]));
             return back();
         }
-        Session::push('message.danger', Lang::get('apps.update.nothing', ['name' => $request->input('title')]));
+        Session::push('message.danger', Lang::get('larrock::apps.update.nothing', ['name' => $request->input('title')]));
         return back()->withInput();
     }
 }
