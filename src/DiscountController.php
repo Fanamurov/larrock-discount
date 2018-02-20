@@ -16,6 +16,10 @@ class DiscountController extends Controller
         $this->config = LarrockDiscount::shareConfig();
     }
 
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function checkKuponDiscount(Request $request)
     {
         if($request->has('keyword')){

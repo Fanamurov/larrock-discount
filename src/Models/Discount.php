@@ -5,7 +5,6 @@ namespace Larrock\ComponentDiscount\Models;
 use Illuminate\Database\Eloquent\Model;
 use Larrock\ComponentCategory\Models\Category;
 use Larrock\ComponentDiscount\Facades\LarrockDiscount;
-use Larrock\Core\Models\Seo;
 use Larrock\Core\Traits\GetLink;
 use Larrock\Core\Component;
 
@@ -77,50 +76,11 @@ class Discount extends Model
         'd_count' => 'integer',
     ];
 
-    protected $appends = [
-        'total_after_apply',
-        'profit_after_apply',
-    ];
-
     protected $dates = ['created_at', 'updated_at', 'date_start', 'date_end'];
 
     public function getConfig()
     {
         return $this->config;
-    }
-
-    public function get_seo()
-    {
-        return $this->hasOne(Seo::class, 'id_connect', 'id');
-    }
-
-    /**
-     * Вычисляет сумму товаров в корзине после применения скидки
-     *
-     * @return float
-     */
-    public function getTotalAfterApplyAttribute()
-    {
-        $total = (float)str_replace(',', '', \Cart::instance('main')->total());
-        if($this->percent > 0){
-            return $total*(100-$this->percent)/100;
-        }
-        if($this->num > 0){
-            return $total-$this->num;
-        }
-        return $total;
-    }
-
-    public function getProfitAfterApplyAttribute()
-    {
-        $total = (float)str_replace(',', '', \Cart::instance('main')->total());
-        if($this->percent > 0){
-            return $total - $total*(100-$this->percent)/100;
-        }
-        if($this->num > 0){
-            return $this->num;
-        }
-        return 0;
     }
 
     public function get_category_discount()

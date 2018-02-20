@@ -3,12 +3,9 @@
 namespace Larrock\ComponentDiscount\Helpers;
 
 use Larrock\ComponentCart\Facades\LarrockCart;
-use Larrock\ComponentCatalog\CatalogComponent;
 use Larrock\ComponentDiscount\Facades\LarrockDiscount;
-use Request;
 use Carbon\Carbon;
 use Cart;
-use Larrock\ComponentCart\Models\Cart as ModelCart;
 use Cache;
 
 class DiscountHelper
@@ -45,6 +42,7 @@ class DiscountHelper
      * TODO: купоны, скидки к товарам, категориям товаров
      * @param null|float|int $total
      * @param null|string $kupon
+     * @return DiscountHelper
      */
     public function check($total = NULL, $kupon = NULL)
     {
@@ -92,28 +90,27 @@ class DiscountHelper
      */
     protected function applyDiscounts()
     {
-        //Применение скидки в корзине
         if($this->d_cart){
             if($this->d_cart->percent > 0){
-                $this->total = $this->total - (($this->total/100) * $this->d_cart->percent);
+                $this->total -= ($this->total/100) * $this->d_cart->percent;
             }elseif($this->d_cart->num > 0){
-                $this->total = $this->total - (float)$this->d_cart->num;
+                $this->total -= (float)$this->d_cart->num;
             }
         }
 
         if($this->d_history){
             if($this->d_history->percent > 0){
-                $this->total = $this->total - (($this->total/100) * $this->d_history->percent);
+                $this->total -= ($this->total/100) * $this->d_history->percent;
             }elseif($this->d_history->num > 0){
-                $this->total = $this->total - (float)$this->d_history->num;
+                $this->total -= (float)$this->d_history->num;
             }
         }
 
         if($this->d_kupon){
             if($this->d_kupon->percent > 0){
-                $this->total = $this->total - (($this->total/100) * $this->d_kupon->percent);
+                $this->total -= ($this->total/100) * $this->d_kupon->percent;
             }elseif($this->d_kupon->num > 0){
-                $this->total = $this->total - (float)$this->d_kupon->num;
+                $this->total -= (float)$this->d_kupon->num;
             }
         }
 
@@ -148,6 +145,11 @@ class DiscountHelper
         return $this;
     }
 
+    /**
+     * Проверка купона
+     * @param $word
+     * @return mixed
+     */
     public function checkKupon($word)
     {
         $this->kupon = $word;

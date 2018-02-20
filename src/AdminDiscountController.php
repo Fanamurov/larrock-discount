@@ -12,7 +12,6 @@ use Larrock\Core\Component;
 use Larrock\Core\Traits\AdminMethodsDestroy;
 use Larrock\Core\Traits\AdminMethodsEdit;
 use Larrock\Core\Traits\ShareMethods;
-use Redirect;
 use Session;
 use Validator;
 use View;
@@ -21,12 +20,9 @@ use View;
  * Class AdminDiscountController
  * @package Larrock\ComponentDiscount
  */
-
 class AdminDiscountController extends Controller
 {
     use AdminMethodsEdit, AdminMethodsDestroy, ShareMethods;
-
-    protected $config;
 
     public function __construct()
     {
@@ -36,6 +32,9 @@ class AdminDiscountController extends Controller
         \Config::set('breadcrumbs.view', 'larrock::admin.breadcrumb.breadcrumb');
     }
 
+    /**
+     * @return array|\Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
     public function index()
     {
         $data['data'] = Discount::with(['get_category_discount'])->get();
@@ -43,6 +42,9 @@ class AdminDiscountController extends Controller
         return view('larrock::admin.discount.index', $data);
     }
 
+    /**
+     * @return $this
+     */
     public function create()
     {
         $test = Request::create('/admin/discount', 'POST', [
@@ -55,6 +57,11 @@ class AdminDiscountController extends Controller
         return $this->store($test);
     }
 
+    /**
+     * @param Request $request
+     * @return $this
+     * @throws \Illuminate\Database\Eloquent\MassAssignmentException
+     */
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), LarrockDiscount::getValid());
@@ -76,6 +83,12 @@ class AdminDiscountController extends Controller
         return back()->to(route('admin.discount.index'));
     }
 
+    /**
+     * @param Request $request
+     * @param $id
+     * @return $this|\Illuminate\Http\RedirectResponse
+     * @throws \Illuminate\Database\Eloquent\MassAssignmentException
+     */
     public function update(Request $request, $id)
     {
         $validator = Validator::make($request->all(), Component::_valid_construct($this->config, 'update', $id));
