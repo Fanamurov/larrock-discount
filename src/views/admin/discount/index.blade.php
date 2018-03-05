@@ -3,25 +3,22 @@
 
 @section('content')
     <div class="container-head uk-margin-bottom">
-        <div class="add-panel uk-margin-bottom uk-text-right">
-            <a class="uk-button" href="#modal-help" data-uk-modal="{target:'#modal-help'}"><i class="uk-icon-question"></i></a>
-            <a class="uk-button uk-button-primary" href="/admin/{{ $app->name }}/create">Добавить скидку</a>
-        </div>
-        <div id="modal-help" class="uk-modal">
-            <div class="uk-modal-dialog">
-                <a class="uk-modal-close uk-close"></a>
-                <p>{{ $app->description }}</p>
+        <div class="uk-grid">
+            <div class="uk-width-expand">
+                {!! Breadcrumbs::render('admin.'. $app->name .'.index') !!}
+            </div>
+            <div class="uk-width-auto">
+                @if(isset($allowCreate))
+                    <a class="uk-button uk-button-primary" href="/admin/{{ $app->name }}/create">Добавить скидку</a>
+                @endif
             </div>
         </div>
-        <div class="uk-clearfix"></div>
-        {!! Breadcrumbs::render('admin.'. $app->name .'.index') !!}
-        <div class="uk-clearfix"></div>
     </div>
 
     @if(count($data) === 0)
         <div class="uk-alert uk-alert-warning">Скидок еще нет</div>
     @else
-        <div class="uk-margin-large-bottom">
+        <div class="uk-margin-large-bottom ibox-content">
             <table class="uk-table uk-table-striped uk-form">
                 <thead>
                 <tr>

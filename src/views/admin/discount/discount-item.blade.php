@@ -1,6 +1,6 @@
 <tr>
     <td>
-        <a class="uk-h4" href="/admin/{{ $app->name }}/{{ $data->id }}/edit">{{ $data->title }} <small class="uk-text-muted">[{{ $data->type }}]</small></a>
+        <a href="/admin/{{ $app->name }}/{{ $data->id }}/edit">{{ $data->title }} <small class="uk-text-muted">[{{ $data->type }}]</small></a>
         @if( !empty($data->word))
             <p>Слово для активации: <strong>{{ $data->word }}</strong></p>
         @endif
@@ -11,7 +11,7 @@
                 @foreach($data->get_category_discount as $category)
                     <li>
                         <a href="/admin/category/{{ $category->id }}/edit">{{ $category->title }}</a>
-                        <span class="uk-text-muted">[<a href="{{ $category->full_url }}" target="_blank" class="uk-text-muted"><i class="uk-icon-link"></i> на сайте</a>]</span>
+                        <span class="uk-text-muted">[<a href="{{ $category->full_url }}" target="_blank" class="uk-text-muted"><span uk-icon="icon: link"></span> на сайте</a>]</span>
                     </li>
                 @endforeach
             </ul>
@@ -36,11 +36,11 @@
     </td>
     <td>
         @if($data->date_end < \Carbon\Carbon::now())
-            <span class="uk-alert uk-alert-danger" style="padding: 2px;">
-                до&nbsp;{{ $data->date_end->format('d/m/Y') }}
+            <span class="uk-text-danger">
+                до&nbsp;{{ $data->date_end->format('d m Y') }}
             </span>
         @else
-            c&nbsp;{{ $data->date_start->format('d/m/Y') }} <br/>до&nbsp;{{ $data->date_end->format('d/m/Y') }}
+            c&nbsp;{{ $data->date_start->format('d m Y') }} <br/>до&nbsp;{{ $data->date_end->format('d m Y') }}
         @endif
     </td>
     @include('larrock::admin.admin-builder.additional-rows-td', ['data_value' => $data])
