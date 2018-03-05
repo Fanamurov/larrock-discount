@@ -4,12 +4,12 @@ namespace Larrock\ComponentDiscount\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Larrock\ComponentCategory\Models\Category;
-use Larrock\ComponentDiscount\Facades\LarrockDiscount;
+use LarrockDiscount;
 use Larrock\Core\Traits\GetLink;
 use Larrock\Core\Component;
 
 /**
- * App\Models\Discount
+ * \Larrock\ComponentDiscount\Models\Discount
  *
  * @property integer $id
  * @property string $title
@@ -51,9 +51,7 @@ use Larrock\Core\Component;
  */
 class Discount extends Model
 {
-    /**
-     * @var $this Component
-     */
+    /** @var $this Component */
     protected $config;
     
     use GetLink;
