@@ -4,7 +4,7 @@ namespace Larrock\ComponentDiscount;
 
 use Illuminate\Routing\Controller;
 use Illuminate\Http\Request;
-use Larrock\ComponentDiscount\Facades\LarrockDiscount;
+use LarrockDiscount;
 use Larrock\ComponentDiscount\Helpers\DiscountHelper;
 
 class DiscountController extends Controller

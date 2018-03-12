@@ -81,7 +81,7 @@ class Discount extends Model
         return $this->config;
     }
 
-    public function get_category_discount()
+    public function getCategoryDiscount()
     {
         return $this->hasMany(Category::class, 'discount_id', 'id')->orderBy('position', 'DESC');
     }

@@ -6,7 +6,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Lang;
-use Larrock\ComponentDiscount\Facades\LarrockDiscount;
+use LarrockDiscount;
 use Larrock\ComponentDiscount\Models\Discount;
 use Larrock\Core\Component;
 use Larrock\Core\Traits\AdminMethodsDestroy;
@@ -37,7 +37,7 @@ class AdminDiscountController extends Controller
      */
     public function index()
     {
-        $data['data'] = Discount::with(['get_category_discount'])->get();
+        $data['data'] = Discount::with(['getCategoryDiscount'])->get();
         View::share('validator', '');
         return view('larrock::admin.discount.index', $data);
     }

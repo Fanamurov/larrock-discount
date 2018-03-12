@@ -5,10 +5,10 @@
             <p>Слово для активации: <strong>{{ $data->word }}</strong></p>
         @endif
 
-        @if(count($data->get_category_discount) > 0)
+        @if(count($data->getCategoryDiscount) > 0)
             <p>Прикреплено к разделам:</p>
             <ul>
-                @foreach($data->get_category_discount as $category)
+                @foreach($data->getCategoryDiscount as $category)
                     <li>
                         <a href="/admin/category/{{ $category->id }}/edit">{{ $category->title }}</a>
                         <span class="uk-text-muted">[<a href="{{ $category->full_url }}" target="_blank" class="uk-text-muted"><span uk-icon="icon: link"></span> на сайте</a>]</span>
