@@ -18,7 +18,7 @@ class LarrockComponentDiscountServiceProvider extends ServiceProvider
         $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
 
         $this->publishes([
-            __DIR__.'/../views' => base_path('resources/views/vendor/larrock')
+            __DIR__.'/../views' => base_path('resources/views/vendor/larrock'),
         ]);
     }
 
@@ -28,8 +28,9 @@ class LarrockComponentDiscountServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->singleton('larrockdiscount', function() {
+        $this->app->singleton('larrockdiscount', function () {
             $class = config('larrock.components.discount', DiscountComponent::class);
+
             return new $class;
         });
 

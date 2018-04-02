@@ -13,5 +13,4 @@ class LarrockDiscount extends Facade
     {
         return 'larrockdiscount';
     }
-
 }
