@@ -2,8 +2,8 @@
 
 namespace Larrock\ComponentDiscount\Middleware;
 
-use Closure;
 use View;
+use Closure;
 use Larrock\ComponentDiscount\Helpers\DiscountHelper;
 
 class DiscountsShare
@@ -16,8 +16,9 @@ class DiscountsShare
      */
     public function handle($request, Closure $next)
     {
-		$discountHelper = new DiscountHelper();
+        $discountHelper = new DiscountHelper();
         View::share('discountsShare', $discountHelper->check());
+
         return $next($request);
     }
 }

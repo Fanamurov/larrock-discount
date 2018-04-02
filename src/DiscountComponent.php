@@ -3,11 +3,11 @@
 namespace Larrock\ComponentDiscount;
 
 use Larrock\Core\Component;
+use Larrock\ComponentDiscount\Models\Discount;
 use Larrock\Core\Helpers\FormBuilder\FormDate;
 use Larrock\Core\Helpers\FormBuilder\FormInput;
 use Larrock\Core\Helpers\FormBuilder\FormSelect;
 use Larrock\Core\Helpers\FormBuilder\FormTextarea;
-use Larrock\ComponentDiscount\Models\Discount;
 
 class DiscountComponent extends Component
 {

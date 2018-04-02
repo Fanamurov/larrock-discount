@@ -2,30 +2,30 @@
 
 namespace Larrock\ComponentDiscount\Models;
 
+use LarrockDiscount;
+use Larrock\Core\Component;
+use Larrock\Core\Traits\GetLink;
 use Illuminate\Database\Eloquent\Model;
 use Larrock\ComponentCategory\Models\Category;
-use LarrockDiscount;
-use Larrock\Core\Traits\GetLink;
-use Larrock\Core\Component;
 
 /**
- * \Larrock\ComponentDiscount\Models\Discount
+ * \Larrock\ComponentDiscount\Models\Discount.
  *
- * @property integer $id
+ * @property int $id
  * @property string $title
  * @property string $description
  * @property string $url
  * @property string $type
  * @property string $word
- * @property integer $cost_min
- * @property integer $cost_max
- * @property integer $percent
- * @property integer $num
- * @property integer $d_count
+ * @property int $cost_min
+ * @property int $cost_max
+ * @property int $percent
+ * @property int $num
+ * @property int $d_count
  * @property \Carbon\Carbon $date_start
  * @property \Carbon\Carbon $date_end
- * @property integer $position
- * @property integer $active
+ * @property int $position
+ * @property int $active
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
  * @property-read mixed $total_after_apply
@@ -53,7 +53,7 @@ class Discount extends Model
 {
     /** @var $this Component */
     protected $config;
-    
+
     use GetLink;
 
     public function __construct(array $attributes = [])

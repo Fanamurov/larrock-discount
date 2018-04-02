@@ -2,23 +2,22 @@
 
 namespace Larrock\ComponentDiscount;
 
-use Carbon\Carbon;
-use Illuminate\Http\Request;
-use Illuminate\Routing\Controller;
 use Lang;
-use LarrockDiscount;
-use Larrock\ComponentDiscount\Models\Discount;
-use Larrock\Core\Component;
-use Larrock\Core\Traits\AdminMethodsDestroy;
-use Larrock\Core\Traits\AdminMethodsEdit;
-use Larrock\Core\Traits\ShareMethods;
+use View;
 use Session;
 use Validator;
-use View;
+use Carbon\Carbon;
+use LarrockDiscount;
+use Larrock\Core\Component;
+use Illuminate\Http\Request;
+use Illuminate\Routing\Controller;
+use Larrock\Core\Traits\ShareMethods;
+use Larrock\Core\Traits\AdminMethodsEdit;
+use Larrock\Core\Traits\AdminMethodsDestroy;
+use Larrock\ComponentDiscount\Models\Discount;
 
 /**
- * Class AdminDiscountController
- * @package Larrock\ComponentDiscount
+ * Class AdminDiscountController.
  */
 class AdminDiscountController extends Controller
 {
@@ -39,6 +38,7 @@ class AdminDiscountController extends Controller
     {
         $data['data'] = Discount::with(['getCategoryDiscount'])->get();
         View::share('validator', '');
+
         return view('larrock::admin.discount.index', $data);
     }
 
@@ -52,8 +52,9 @@ class AdminDiscountController extends Controller
             'type' => 'default',
             'date_start' => Carbon::now()->format('Y-m-d H:s:i'),
             'date_end' => Carbon::now()->format('Y-m-d H:s:i'),
-            'active' => 0
+            'active' => 0,
         ]);
+
         return $this->store($test);
     }
 
@@ -65,7 +66,7 @@ class AdminDiscountController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), LarrockDiscount::getValid());
-        if($validator->fails()){
+        if ($validator->fails()) {
             return back()->withInput($request->except('password'))->withErrors($validator);
         }
 
@@ -74,12 +75,13 @@ class AdminDiscountController extends Controller
         $data->active = $request->input('active', 0);
         $data->position = $request->input('position', 0);
 
-        if($data->save()){
+        if ($data->save()) {
             \Cache::flush();
             Session::push('message.success', Lang::get('larrock::apps.create.success-temp'));
-        }else{
-            Session::push('message.danger',  Lang::get('larrock::apps.create.error'));
+        } else {
+            Session::push('message.danger', Lang::get('larrock::apps.create.error'));
         }
+
         return back()->to(route('admin.discount.index'));
     }
 
@@ -92,19 +94,21 @@ class AdminDiscountController extends Controller
     public function update(Request $request, $id)
     {
         $validator = Validator::make($request->all(), Component::_valid_construct($this->config, 'update', $id));
-        if($validator->fails()){
+        if ($validator->fails()) {
             return back()->withInput($request->except('password'))->withErrors($validator);
         }
 
         $data = Discount::find($id);
         $update_data = $request->all();
         $update_data['url'] = str_slug($request->get('title'));
-        if($data->fill($update_data)->save()){
+        if ($data->fill($update_data)->save()) {
             \Cache::flush();
             Session::push('message.success', Lang::get('larrock::apps.update.success', ['name' => $request->input('title')]));
+
             return back();
         }
         Session::push('message.danger', Lang::get('larrock::apps.update.nothing', ['name' => $request->input('title')]));
+
         return back()->withInput();
     }
 }
