@@ -17,15 +17,15 @@
             </ul>
         @endif
     </td>
-    <td>@if($data->cost_max > 0){{ $data->cost_min }} - {{ $data->cost_max }}@endif</td>
-    <td>
+    <td class="uk-visible@s">@if($data->cost_max > 0){{ $data->cost_min }} - {{ $data->cost_max }}@endif</td>
+    <td class="uk-visible@s">
         @if($data->num > 0)
             {{ $data->num }} руб.
         @else
             {{ $data->percent }}%
         @endif
     </td>
-    <td>
+    <td class="uk-visible@s">
         @if($data->d_count > 0)
             {{ $data->d_count }}
         @else
@@ -34,7 +34,7 @@
             </span>
         @endif
     </td>
-    <td>
+    <td class="uk-visible@s">
         @if($data->date_end < \Carbon\Carbon::now())
             <span class="uk-text-danger">
                 до&nbsp;{{ $data->date_end->format('d m Y') }}

@@ -23,10 +23,10 @@
                 <thead>
                 <tr>
                     <th>Скидка</th>
-                    <th>Сумма активации</th>
-                    <th>Сумма скидки</th>
-                    <th>Осталось</th>
-                    <th>Даты</th>
+                    <th class="uk-visible@s">Сумма активации</th>
+                    <th class="uk-visible@s">Сумма скидки</th>
+                    <th class="uk-visible@s">Осталось</th>
+                    <th class="uk-visible@s">Даты</th>
                     @include('larrock::admin.admin-builder.additional-rows-th')
                 </tr>
                 </thead>
