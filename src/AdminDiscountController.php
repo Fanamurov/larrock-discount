@@ -82,7 +82,7 @@ class AdminDiscountController extends Controller
             Session::push('message.danger', Lang::get('larrock::apps.create.error'));
         }
 
-        return redirect()->to('admin/discount/'. $data->id .'/edit');
+        return redirect()->to('admin/discount/'.$data->id.'/edit');
     }
 
     /**
