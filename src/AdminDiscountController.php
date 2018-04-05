@@ -3,6 +3,8 @@
 namespace Larrock\ComponentDiscount;
 
 use Lang;
+use Larrock\Core\Events\ComponentItemStored;
+use Larrock\Core\Events\ComponentItemUpdated;
 use View;
 use Session;
 use Validator;
@@ -65,17 +67,18 @@ class AdminDiscountController extends Controller
      */
     public function store(Request $request)
     {
-        $validator = Validator::make($request->all(), LarrockDiscount::getValid());
-        if ($validator->fails()) {
-            return back()->withInput($request->except('password'))->withErrors($validator);
-        }
-
         $data = new Discount();
         $data->fill($request->all());
         $data->active = $request->input('active', 0);
         $data->position = $request->input('position', 0);
 
+        $validator = Validator::make($data->toArray(), $this->config->getValid());
+        if ($validator->fails()) {
+            return back()->withInput($request->except('password'))->withErrors($validator);
+        }
+
         if ($data->save()) {
+            event(new ComponentItemStored($this->config, $data, $request));
             \Cache::flush();
             Session::push('message.success', Lang::get('larrock::apps.create.success-temp'));
         } else {
@@ -93,15 +96,18 @@ class AdminDiscountController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $validator = Validator::make($request->all(), Component::_valid_construct($this->config, 'update', $id));
+        $data = Discount::find($id);
+        $update_data = $request->all();
+        $update_data['url'] = str_slug($request->get('title'));
+        $data->fill($update_data);
+
+        $validator = Validator::make($data->toArray(), $this->config->getValid($id));
         if ($validator->fails()) {
             return back()->withInput($request->except('password'))->withErrors($validator);
         }
 
-        $data = Discount::find($id);
-        $update_data = $request->all();
-        $update_data['url'] = str_slug($request->get('title'));
-        if ($data->fill($update_data)->save()) {
+        if ($data->save()) {
+            event(new ComponentItemUpdated($this->config, $data, $request));
             \Cache::flush();
             Session::push('message.success', Lang::get('larrock::apps.update.success', ['name' => $request->input('title')]));
 
