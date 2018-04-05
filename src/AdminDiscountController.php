@@ -3,19 +3,18 @@
 namespace Larrock\ComponentDiscount;
 
 use Lang;
-use Larrock\Core\Events\ComponentItemStored;
-use Larrock\Core\Events\ComponentItemUpdated;
 use View;
 use Session;
 use Validator;
 use Carbon\Carbon;
 use LarrockDiscount;
-use Larrock\Core\Component;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Larrock\Core\Traits\ShareMethods;
 use Larrock\Core\Traits\AdminMethodsEdit;
+use Larrock\Core\Events\ComponentItemStored;
 use Larrock\Core\Traits\AdminMethodsDestroy;
+use Larrock\Core\Events\ComponentItemUpdated;
 use Larrock\ComponentDiscount\Models\Discount;
 
 /**
