@@ -1,6 +1,6 @@
 <tr>
     <td>
-        <a href="/admin/{{ $app->name }}/{{ $data->id }}/edit">{{ $data->title }} <small class="uk-text-muted">[{{ $data->type }}]</small></a>
+        <a href="/admin/{{ $package->name }}/{{ $data->id }}/edit">{{ $data->title }} <small class="uk-text-muted">[{{ $data->type }}]</small></a>
         @if( !empty($data->word))
             <p>Слово для активации: <strong>{{ $data->word }}</strong></p>
         @endif
